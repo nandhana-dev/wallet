@@ -3,38 +3,55 @@
 <head>
 	<title>KBA Wallet</title>
 	<script type="module" src="Wallet.js"></script>
+	<style>
+		body {
+		  height: 70vh;
+		  display: flex;
+		  justify-content: center;
+		  align-items: top;
+		}
+
+		.box {
+		  width: 600px;
+		  border: 1px solid black;
+		  padding: 20px;
+		  text-align: center;
+		}
+	</style>
 </head>
 <body>
-	<h1>KBA Wallet</h1>
-	Account:
-	<select id="myDropdown"></select>
-	<br><br>
-	Account Address : <label id="accountAddress"></label>
-	<br><br>
-	ETH Balance : <label id="ethBalance"></label>
-	<br>
-	<br>
-	
-	<button type="button" id="btnChangeAccountName" class="btn-primary">Change Account Name</button>
-	<button type="button" id="btnAddNewAccount" class="btn-primary">Add New Account</button>
-	<button type="button" id="btnSendETH" class="btn-primary">Send ETH</button>
+	<div class="box">
+		<h1>KBA Wallet</h1>
+		Account:
+		<select id="myDropdown"></select>
+		<br><br>
+		Account Address : <label id="accountAddress"></label>
+		<br><br>
+		ETH Balance : <label id="ethBalance"></label>
+		<br>
+		<br>
 
-		<div id="dvChangeAccoutName" style="display: none;">
-			<br>
-			<input type="text" size="20%"  id="txtAccountName" name="txtAccountName" required>
-			<br>
-			<button type="button" id="btnSaveAccountName" class="btn-primary">Save Account Name</button>
-		</div>
+		<button type="button" id="btnChangeAccountName" class="btn-primary">Change Account Name</button>
+		<button type="button" id="btnAddNewAccount" class="btn-primary">Add New Account</button>
+		<button type="button" id="btnSendETH" class="btn-primary">Send ETH</button>
 
-		<div id="dvSendETH" style="display: none;">
-			<br>
-			To Account: <input type="text" size="46%"  id="sendAddress" name="sendAddress" required>
-			<br>
-			<br>
-			Enter ETH Value:   <input type="text" size="10%"  id="enterValue" name="enterValue" required>
-			<br>
-			<br>
-			<button type="button" id="btnTranferToAccount" class="btn-primary">Tranfer ETH </button>
-		</div>
+			<div id="dvChangeAccoutName" style="display: none;">
+				<br>
+				<input type="text" size="20%"  id="txtAccountName" name="txtAccountName" required>
+				<br>
+				<button type="button" id="btnSaveAccountName" class="btn-primary">Save Account Name</button>
+			</div>
+
+			<div id="dvSendETH" style="display: none;">
+				<br>
+				To Account: <input type="text" size="46%"  id="sendAddress" name="sendAddress" required>
+				<br>
+				<br>
+				Enter ETH Value:   <input type="text" size="10%"  id="enterValue" name="enterValue" required>
+				<br>
+				<br>
+				<button type="button" id="btnTranferToAccount" class="btn-primary">Tranfer ETH </button>
+			</div>
+	</div>
 </body>
 </html>
