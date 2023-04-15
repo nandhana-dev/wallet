@@ -1,13 +1,11 @@
+import { ethers } from './ethers.min.js';
+
 var button = document.getElementById('btnRegister');
 button.addEventListener('click', function() {
   
-  const username = "your_username";
   const password = "your_password";
-
-  localStorage.setItem("username", username);
   localStorage.setItem("password", password);
 
-  const storedUsername = localStorage.getItem("username");
   const storedPassword = localStorage.getItem("password");
 
   const provider = new ethers.providers.JsonRpcProvider('http://localhost:7545');  
