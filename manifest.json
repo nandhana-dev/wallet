@@ -9,8 +9,5 @@
   },
   "permissions": [
     "tabs","storage"
-  ],
-  "background": {
-    "service_worker": "ethers.min.js"
-  }
+  ]
 }
