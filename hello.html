@@ -1,0 +1,77 @@
+<html>
+  <head>
+    <title>KBA Wallet</title>
+    <link rel="stylesheet" href="style.css">
+    
+    
+    <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js"></script>
+    <script src="ganache-rpc.js"></script>
+    
+    
+  </head>
+  <body>
+
+    <header>
+      <nav>
+        <a href="#">KBA Wallet</a>
+      </nav>
+    </header>
+    <main>
+      <section class="hero">
+        <h1>Secure and Accessible</h1>
+        Trusted by millions, KBAW is a secure wallet making the world of web3 accessible to all.
+      </section>
+      <br>
+
+      
+
+      <section class="cta">
+        <button type="button" class="btn-primary" onclick="makeRequest()">Test Connection</button>
+      </section>
+      <br>
+      
+
+      User Name<br>
+      <input type="text" id="userName" name="userName" class="form-control">
+      <br>
+      Password <br>
+      <input type="text" id="password" name="password" class="form-control">
+      <br>
+      <button type="submit" class="btn-primary" onclick="saveusernamepwd()">Submit</button>
+      <br>
+      <br>
+      <section class="balance">
+        <div class="form-group">
+          <label for="getBalanceAddress">Enter Wallet Address:</label>
+          <br>
+          <input type="text" id="getBalanceAddress" name="getBalanceAddress" class="form-control">
+        </div>
+        <button type="button" class="btn-primary" onclick="getBalance()">Check Balance</button>
+        <div id="balanceResult"></div>
+      </section>
+      <br>
+
+      
+
+      From Wallet Address:<br>
+      <input type="text" id="transferFrom" name="transferFrom" class="form-control">
+      <br>
+      To Wallet Address:<br>
+      <input type="text" id="transferTo" name="transferTo" class="form-control">
+      <br>
+      <button type="button" class="btn-primary" onclick="transfer()">Transfer ETH</button>
+      <br><br>
+      
+      Enter Seed Phrase :
+      <br>
+      <textarea id="importwalletAddress" name="message" rows="4" cols="30"></textarea>
+      <br>
+      <button type="button" class="btn-primary" onclick="importwallet()">Import Wallet</button>
+      <br>
+      <button type="button" class="btn-primary" onclick="createWallet()">Create New Wallet</button>
+    </main>
+    <footer>
+      <p>&copy; 2023 KBA Wallet. All rights reserved.</p>
+    </footer>
+  </body>
+</html>

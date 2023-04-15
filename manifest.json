@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "KBA Wallet",
+  "description": "KBA Wallet Extension",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "kba_logo_new.png"
+  },
+  "permissions": [
+    "tabs","storage"
+  ],
+  "background": {
+    "service_worker": "ethers.min.js"
+  }
+}
