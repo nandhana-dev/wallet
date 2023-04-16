@@ -4,7 +4,7 @@
   "description": "KBA Wallet Extension",
   "version": "1.0",
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "Popup.html",
     "default_icon": "kba_logo_new.png"
   },
   "permissions": [

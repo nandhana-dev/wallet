@@ -1,18 +1,59 @@
 <!DOCTYPE html>
-<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' 'unsafe-inline';">
 <html>
 <head>
-  <title>My Simple HTML Document</title>
+	<title>KBA Wallet</title>
+	<style>
+      body {
+      height: 70vh;
+      display: flex;
+      justify-content: center;
+      align-items: top;
+      margin-top: 50px;
+    }
+
+    .box {
+      width: 600px;
+      border: 1px solid black;
+      padding: 20px;
+      text-align: center;
+      background-color: #6975df; /* light blue color */
+    }
+
+		button {
+			padding: 10px 20px;
+			background-color: #4447ae;
+			color: white;
+			border: none;
+			border-radius: 5px;
+			font-size: 16px;
+			cursor: pointer;
+			display: block;
+			margin: 0 auto;
+			margin-top: 20px;
+		}
+
+		button:hover {
+			background-color: #3e8e41;
+		}
+
+		h1 {
+			text-align: center;
+		}
+
+		p {
+			text-align: center;
+		}
+	</style>
+	<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' 'unsafe-inline';">
 </head>
 <body>
-  <h1>KBA Wallet!!!!</h1>
-  <p>KBA Wallet is great wallet</p>
-  <br>
-  <br>
-  <button id="createNewWallet">Create New Wallet </button>
-  <br>
-  <br>
-  <button id="importExistingWallet">Import Existing Wallet </button>
-  <script src="OnBoard.js"></script>
+	<div class="box">
+    <h1>KBA Wallet!!!!</h1>
+    <p>KBA Wallet is a great wallet</p>
+    
+    <button id="createNewWallet">Create New Wallet</button>
+		<button id="importExistingWallet">Import Existing Wallet</button>
+	</div>
+	<script src="OnBoard.js"></script>
 </body>
 </html>

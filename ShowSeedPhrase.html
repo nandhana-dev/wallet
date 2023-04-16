@@ -1,14 +1,67 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>My Webpage</title>
-  </head>
-  <body>
+<head>
+	<title>My Webpage</title>
+	<style>
+      body {
+        height: 70vh;
+        display: flex;
+        justify-content: center;
+        align-items: top;
+        margin-top: 50px;
+      }
+      .box {
+      width: 600px;
+      border: 1px solid black;
+      padding: 20px;
+      text-align: center;
+      background-color: #6975df; /* light blue color */
+    }
+
+      textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid black;
+        border-radius: 5px;
+        box-sizing: border-box;
+        margin-top: 20px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #4447ae;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        display: block;
+        margin: 0 auto;
+        margin-top: 20px;
+      }
+
+      button:hover {
+        background-color: #3e8e41;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      p {
+        text-align: center;
+      }
+    </style>
+</head>
+<body>
+	<div class="box">
+    <h1>KBA Wallet</h1>
     <script type="module" src="ShowSeedPhrase.js"></script>
-      Copy Seed Phrase :
-      <br>
-      <textarea id="seedPhrase" name="seedPhrase" rows="4" cols="30"></textarea>
-      <br>
-      <button type="button" id="btnGoTowallet" class="btn-primary">Go To Wallet</button>
- </body>
+    Copy Seed Phrase :
+    <br>
+    <textarea id="seedPhrase" name="seedPhrase" rows="4" cols="30"></textarea>
+    <br>
+    <button type="button" id="btnGoTowallet" class="btn-primary">Go To Wallet</button>
+	</div>
+</body>
 </html>
