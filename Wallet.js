@@ -2,7 +2,18 @@ import { ethers } from './ethers.min.js';
 import { AccountArray } from './Account.js';
 
 const seedPhrase = localStorage.getItem("SeedPhrase");
-console.log(seedPhrase);
+
+const password = localStorage.getItem("Password");
+if (!password || password === "null") {
+  chrome.tabs.create({url: 'NewWalletRegister.html'});
+} 
+else 
+{
+  const seedPhrase = localStorage.getItem("SeedPhrase");
+  if (!seedPhrase || seedPhrase === "null") {
+    chrome.tabs.create({url: 'OnBoard.html'});
+  } 
+}
 
 const dropdown = document.getElementById("myDropdown");
 const ethBalance = document.getElementById("ethBalance");
@@ -98,6 +109,7 @@ function LoadAccountFromLocalStroage()
   }
   else 
   {
+      accounts = obj.accounts;
       if (accounts === null || accounts.length === 0) {
       CreateNew(0);
       obj = JSON.parse(localStorage.getItem("Accounts"));

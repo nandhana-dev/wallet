@@ -112,24 +112,25 @@ function LoadAccountFromLocalStroage()
   var obj = JSON.parse(localStorage.getItem("Accounts"));
   var accounts = null;
 
-  // if (obj === null) {
-  //   CreateNew(0);
-  //   obj = JSON.parse(localStorage.getItem("Accounts"));
-  //   accounts = obj.accounts;
-  // }
-  // else 
-  // {
-  //     if (accounts === null || accounts.length === 0) {
-  //     CreateNew(0);
-  //     obj = JSON.parse(localStorage.getItem("Accounts"));
-  //     accounts = obj.accounts;
-  //   }
-  //   else 
-  //   {
-  //     accounts = obj.accounts;
-  //   }
-  // }
-  accounts = obj.accounts;
+  if (obj === null) {
+    CreateNew(0);
+    obj = JSON.parse(localStorage.getItem("Accounts"));
+    accounts = obj.accounts;
+  }
+  else 
+  {
+    accounts = obj.accounts;
+    if (accounts === null || accounts.length === 0) {
+      CreateNew(0);
+      obj = JSON.parse(localStorage.getItem("Accounts"));
+      accounts = obj.accounts;
+    }
+    else 
+    {
+      accounts = obj.accounts;
+    }
+  }
+  
   
   accounts.forEach(account => {
     const option = document.createElement('option');
