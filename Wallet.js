@@ -18,7 +18,6 @@ else
 const dropdown = document.getElementById("myDropdown");
 const ethBalance = document.getElementById("ethBalance");
 const accountAddress = document.getElementById("accountAddress");
-
 const txtAccountName = document.getElementById("txtAccountName");
 const dvChangeAccoutName = document.getElementById("dvChangeAccoutName");
 const dvSendETH = document.getElementById("dvSendETH");
@@ -57,46 +56,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
    
     LoadAccountFromLocalStroage();
-    
 });
-
-function CreateAccount()
-{
-      const mnemonic = seedPhrase;
-      //const mnemonic = "lazy nut drip tent subject brush hold distance help rich slam pizza";
-      console.log(mnemonic);
-      const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
-      console.log('Wallet imported:');
-      const addressCount = 1;
-      const provider = new ethers.providers.JsonRpcProvider('http://localhost:7545');
-      
-      const options = [];
-      const defaultAccountName='Account 1'
-      const accountArray = new AccountArray();
-      
-      const childNode = rootNode.derivePath(`m/44'/60'/0'/0/${0}`);
-      const address = ethers.utils.getAddress(childNode.address);
-
-      provider.getBalance(address).then(balance =>
-      {
-      options.push({ label: address, value: address });
-      const optionElement = document.createElement("option");
-      optionElement.value = address;
-      optionElement.text =  defaultAccountName;
-      dropdown.appendChild(optionElement);
-      });
-
-      accountArray.addAccount(defaultAccountName, address);
-      accountArray.addAccount(defaultAccountName+"2", address+"2");
-
-      const jsonString = JSON.stringify(accountArray);
-      localStorage.setItem('Accounts', jsonString);
-
-}
-
 
 function LoadAccountFromLocalStroage()
 {
+  
   dropdown.options.length = 0;
 
   var obj = JSON.parse(localStorage.getItem("Accounts"));
@@ -109,7 +73,7 @@ function LoadAccountFromLocalStroage()
   }
   else 
   {
-      accounts = obj.accounts;
+    accounts = obj.accounts;
       if (accounts === null || accounts.length === 0) {
       CreateNew(0);
       obj = JSON.parse(localStorage.getItem("Accounts"));
@@ -120,16 +84,16 @@ function LoadAccountFromLocalStroage()
       accounts = obj.accounts;
     }
   }
-  
-  
+    
   accounts.forEach(account => {
     const option = document.createElement('option');
     option.text = account.accountName;
     option.value = account.address;
     dropdown.appendChild(option);
   });
-
+  
   GetBalance();
+
 }
 
 function CreateNew(index)
