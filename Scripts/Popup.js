@@ -1,9 +1,14 @@
+import { WalletGlobal } from './WalletGlobal.js';
 import { ethers } from './ethers.min.js';
 import { AccountArray } from './Account.js';
 
-const seedPhrase = localStorage.getItem("SeedPhrase");
+//const seedPhrase = localStorage.getItem("SeedPhrase");
+//const password = localStorage.getItem("Password");
 
-const password = localStorage.getItem("Password");
+const seedPhrase = WalletGlobal.WalletSeedPhrase;
+const password = WalletGlobal.WalletPassword;
+
+
 if (!password || password === "null") {
   chrome.tabs.create({url: 'Page/CreatePassword.html'});
 } 

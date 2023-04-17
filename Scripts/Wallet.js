@@ -1,21 +1,21 @@
+import { WalletGlobal } from './WalletGlobal.js';
 import { ethers } from './ethers.min.js';
 import { AccountArray } from './Account.js';
 
-const seedPhrase = localStorage.getItem("SeedPhrase");
+const seedPhrase = WalletGlobal.WalletSeedPhrase;
+const password = WalletGlobal.WalletPassword;
 
-const password = localStorage.getItem("Password");
 if (!password || password === "null") {
   chrome.tabs.create({url: 'Page/CreatePassword.html'});
 } 
 else 
 {
-  const seedPhrase = localStorage.getItem("SeedPhrase");
   if (!seedPhrase || seedPhrase === "null") {
     chrome.tabs.create({url: 'Page/OnBoard.html'});
   } 
 }
 
-const dropdown = document.getElementById("myDropdown");
+const ddnAccounts = document.getElementById("ddnAccounts");
 const ethBalance = document.getElementById("ethBalance");
 const accountAddress = document.getElementById("accountAddress");
 const txtAccountName = document.getElementById("txtAccountName");
@@ -50,8 +50,8 @@ document.addEventListener('DOMContentLoaded', function() {
       TranferToAccount();
     });
     
-    var dropdown = document.getElementById('myDropdown');
-    dropdown.addEventListener('change', function() {
+    var ddnAccounts = document.getElementById('ddnAccounts');
+    ddnAccounts.addEventListener('change', function() {
       GetBalance();
     });
    
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function LoadAccountFromLocalStroage()
 {
   
-  dropdown.options.length = 0;
+  ddnAccounts.options.length = 0;
 
   var obj = JSON.parse(localStorage.getItem("Accounts"));
   var accounts = null;
@@ -89,7 +89,7 @@ function LoadAccountFromLocalStroage()
     const option = document.createElement('option');
     option.text = account.accountName;
     option.value = account.address;
-    dropdown.appendChild(option);
+    ddnAccounts.appendChild(option);
   });
 
   GetBalance();
@@ -118,7 +118,7 @@ function CreateNew(index)
 
 function AddNew()
 {
-  dropdown.options.length = 0;
+  ddnAccounts.options.length = 0;
 
   var obj = JSON.parse(localStorage.getItem("Accounts"));
   var accounts = null;
@@ -139,14 +139,14 @@ function AddNew()
     const option = document.createElement('option');
     option.text = account.accountName;
     option.value = account.address;
-    dropdown.appendChild(option);
+    ddnAccounts.appendChild(option);
     accountArray.addAccount(account.accountName, account.address);
   });
 
   const option1 = document.createElement('option');
   option1.text = defaultAccountName;
   option1.value = address;
-  dropdown.appendChild(option1);
+  ddnAccounts.appendChild(option1);
   accountArray.addAccount(defaultAccountName, address);
   
   const jsonString = JSON.stringify(accountArray);
@@ -163,7 +163,7 @@ function ChangeAccountName()
   } else {
     dvChangeAccoutName.style.display = "none";
   }
-  var selectedText = dropdown.options[dropdown.selectedIndex].text;
+  var selectedText = ddnAccounts.options[ddnAccounts.selectedIndex].text;
   txtAccountName.value = selectedText;
  }
 
@@ -182,7 +182,7 @@ function SaveAccountName()
 {
  
   const obj = JSON.parse(localStorage.getItem("Accounts"));
-  const accountToUpdate = obj.accounts.find(account => account.address === dropdown.value);
+  const accountToUpdate = obj.accounts.find(account => account.address === ddnAccounts.value);
 
   if (accountToUpdate) {
     accountToUpdate.accountName = txtAccountName.value ;
@@ -195,13 +195,13 @@ function SaveAccountName()
   
   localStorage.setItem('Accounts', jsonString);
 
-  dropdown.options.length = 0;
+  ddnAccounts.options.length = 0;
 
   obj.accounts.forEach(account => {
     const option = document.createElement('option');
     option.text = account.accountName;
     option.value = account.address;
-    dropdown.appendChild(option);
+    ddnAccounts.appendChild(option);
   });
 
   GetBalance();
@@ -215,7 +215,7 @@ function SaveAccountName()
 function GetBalance()
 {
   console.log('getBalance Started');
-  const checkBalanceAddress = dropdown.value;
+  const checkBalanceAddress = ddnAccounts.value;
   
   const xhr = new XMLHttpRequest();
   xhr.open('POST', 'http://localhost:7545');
@@ -247,7 +247,7 @@ function GetBalance()
 
 function TranferToAccount()
 {
-    const senderAddress = dropdown.value;
+    const senderAddress = ddnAccounts.value;
     var sendAddress = document.getElementById("sendAddress").value;
     const recipientAddress = sendAddress;
     
