@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function ExpandView()
 {
-  chrome.tabs.create({url: 'Wallet.html'});
+  chrome.tabs.create({url: 'Page/Wallet.html'});
 }
 
 function CreateAccount()
