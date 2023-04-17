@@ -5,13 +5,13 @@ const seedPhrase = localStorage.getItem("SeedPhrase");
 
 const password = localStorage.getItem("Password");
 if (!password || password === "null") {
-  chrome.tabs.create({url: 'NewWalletRegister.html'});
+  chrome.tabs.create({url: 'Page/CreatePassword.html'});
 } 
 else 
 {
   const seedPhrase = localStorage.getItem("SeedPhrase");
   if (!seedPhrase || seedPhrase === "null") {
-    chrome.tabs.create({url: 'OnBoard.html'});
+    chrome.tabs.create({url: 'Page/OnBoard.html'});
   } 
 }
 
@@ -91,16 +91,17 @@ function LoadAccountFromLocalStroage()
     option.value = account.address;
     dropdown.appendChild(option);
   });
-  
+
   GetBalance();
 
 }
 
 function CreateNew(index)
 {
+    const provider = new ethers.providers.JsonRpcProvider('http://localhost:7545');  
     const mnemonic = seedPhrase;
     const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
-    const provider = new ethers.providers.JsonRpcProvider('http://localhost:7545');
+    
     const options = [];
     const defaultAccountName='Account '+ (index+1);
     const accountArray = new AccountArray();
@@ -153,6 +154,7 @@ function AddNew()
   
   GetBalance();
 }
+
 
 function ChangeAccountName()
 {
@@ -245,12 +247,8 @@ function GetBalance()
 
 function TranferToAccount()
 {
-    console.log('transfer Started');
-    //var transferFrom = document.getElementById("transferFrom").value;
     const senderAddress = dropdown.value;
-
     var sendAddress = document.getElementById("sendAddress").value;
-    //const senderAddress = transferFrom;
     const recipientAddress = sendAddress;
     
     var ethAmount = document.getElementById("enterValue").value;
@@ -258,8 +256,7 @@ function TranferToAccount()
     const amountToSend = weiAmount;
     
     const xhr = new XMLHttpRequest();
-    const endpoint = 'http://localhost:7545'; // Ganache RPC endpoint
-    //const amountToSend = '100000000000000000'; // 0.1 ETH in wei
+    const endpoint = 'http://localhost:7545';
       const txParams = {
       from: senderAddress,
       to: recipientAddress,

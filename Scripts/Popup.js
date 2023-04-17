@@ -5,13 +5,13 @@ const seedPhrase = localStorage.getItem("SeedPhrase");
 
 const password = localStorage.getItem("Password");
 if (!password || password === "null") {
-  chrome.tabs.create({url: 'NewWalletRegister.html'});
+  chrome.tabs.create({url: 'Page/CreatePassword.html'});
 } 
 else 
 {
   const seedPhrase = localStorage.getItem("SeedPhrase");
   if (!seedPhrase || seedPhrase === "null") {
-    chrome.tabs.create({url: 'OnBoard.html'});
+    chrome.tabs.create({url: 'Page/OnBoard.html'});
   } 
 }
 

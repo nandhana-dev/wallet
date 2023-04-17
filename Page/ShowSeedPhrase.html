@@ -16,7 +16,7 @@
       padding: 20px;
       text-align: center;
       background-color: #6975df; /* light blue color */
-      }
+    }
 
       textarea {
         width: 100%;
@@ -56,11 +56,12 @@
 <body>
 	<div class="box">
     <h1>KBA Wallet</h1>
-    <label for="password">Password:</label>
+    <script type="module" src="../Scripts/ShowSeedPhrase.js"></script>
+    Copy Seed Phrase :
     <br>
-    <input type="password" id="password" name="password" required><br><br>
-    <button id="btnRegister">Register</button>
-    <script type="module" src="NewWalletRegister.js"></script>
+    <textarea id="seedPhrase" name="seedPhrase" rows="4" cols="30"></textarea>
+    <br>
+    <button type="button" id="btnGoTowallet" class="btn-primary">Go To Wallet</button>
 	</div>
 </body>
 </html>
