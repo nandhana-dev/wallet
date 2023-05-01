@@ -42,7 +42,7 @@ function about(){
         // Call the contract function to retrieve data
         const result = await contract.store_it();
         // Update the HTML output with the retrieved data
-        document.getElementById('output').innerText = 'Trusted by All ..' + result;
+        document.getElementById('output').innerText = 'Wallet for Everyone ..' + result;
     } catch (error) {
         console.error(error);
     }
