@@ -1,4 +1,11 @@
+import { WalletGlobal } from './WalletGlobal.js';
 import { ethers } from './ethers.min.js';
+
+const seedPhrase = WalletGlobal.WalletSeedPhrase;
+const password = WalletGlobal.WalletPassword;
+const walletAccounts = WalletGlobal.WalletAccounts;
+const walletNetworkEndpoint = WalletGlobal.WalletNetworkEndpoint
+const provider = new ethers.providers.JsonRpcProvider(walletNetworkEndpoint);
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -23,7 +30,6 @@ function importwallet(seedPhrase) {
   // Do something with the seed phrase
   alert('Importing wallet with seed phrase: ' + seedPhrase);
 
-  var provider = new ethers.providers.JsonRpcProvider('http://localhost:7545');
  
   // Get all the wallet addresses
   provider.listAccounts().then(accounts => {

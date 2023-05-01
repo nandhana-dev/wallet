@@ -1,8 +1,14 @@
+import { WalletGlobal } from './WalletGlobal.js';
 import { ethers } from './ethers.min.js';
+
+const password = WalletGlobal.WalletPassword;
+const walletAccounts = WalletGlobal.WalletAccounts;
+const walletNetworkEndpoint = WalletGlobal.WalletNetworkEndpoint
+const provider = new ethers.providers.JsonRpcProvider(walletNetworkEndpoint);
+
 
 const seedPhrase = document.getElementById("seedPhrase");
 
-const provider = new ethers.providers.JsonRpcProvider('http://localhost:7545');  
 const wallet = ethers.Wallet.createRandom();
 const mnemonic = wallet.mnemonic.phrase;
 console.log('New wallet created:');

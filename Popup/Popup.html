@@ -1,40 +1,148 @@
 <html >
   <head>
-    <title>My Extension</title>
-    <script type="module"  src="../Scripts/Popup.js"></script>
+    <title>KBA Wallet</title>
+    <script type="module" src="..\Scripts\Wallet.js"></script>
+    <style>
+      body {
+        height: 97vh;
+        display: flex;
+        justify-content: center;
+        align-items: top;
+        margin-top: 10px;
+        width: 80vh;
+      }
+  
+      .box {
+        width: 100%;
+        border: 1px solid black;
+        padding: 20px;
+        text-align: center;
+        background-color: #6975df; /* light blue color */
+      }
+  
+      textarea {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid black;
+          border-radius: 5px;
+          box-sizing: border-box;
+          margin-top: 20px;
+        }
+  
+      button {
+      padding: 5px 5px;
+      background-color: #4447ae;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 10px;
+      cursor: pointer;
+      display: inline-block;
+      margin-right: 10px;
+      }
+  
+      button:hover {
+        background-color: #3e8e41;
+      }
+  
+      h1 {
+        text-align: center;
+      }
+  
+      p {
+        text-align: center;
+      }
+      #dvInformationMessage {
+        width: 100%;
+        background-color: rgb(1, 3, 30);
+        color: white;
+        font-weight: bold;
+        display: none;
+      }
+  
+    </style>
   </head>
-  <body style="width: 380px;background-color: #3366cc; "  >
-    <button id="btnExpandView">Expand View</button>
-
+  <body >
+    
+    <div class="box">
+      <button id="btnExpandView">Expand View</button>
+      <div id="dvInformationMessage"></div>
       <h1>KBA Wallet</h1>
       Account:
-      <select id="myDropdown"></select>
+      <select id="ddnAccounts"></select>
       <br><br>
       Account Address : <label id="accountAddress"></label>
       <br><br>
       ETH Balance : <label id="ethBalance"></label>
       <br>
       <br>
-      <button type="button" id="btnChangeAccountName" class="btn-primary">Change Account Name</button>
-      <button type="button" id="btnAddNewAccount" class="btn-primary">Add New Account</button>
-      <button type="button" id="btnSendETH" class="btn-primary">Send ETH</button>
-
-      <div id="dvChangeAccoutName" style="display: none;">
+  
+      <button type="button" id="btnChangeAccountName" >Change Account Name</button>
+      <button type="button" id="btnAddNewAccount" >Add New Account</button>
+      <button type="button" id="btnSendETH" >Send ETH</button>
+      <button type="button" id="btnSettings" >Settings</button>
+  
+      <div id="dvChangeAccoutName" style="display: none; background-color: aliceblue; border-radius: 10px; margin-top: 20px;">
+        <br>
+        <div style="text-align: center;">
           <br>
           <input type="text" size="20%"  id="txtAccountName" name="txtAccountName" required>
           <br>
+          <br>
           <button type="button" id="btnSaveAccountName" class="btn-primary">Save Account Name</button>
+          <br>
+        </div>
+        <br>
       </div>
-
-        <div id="dvSendETH" style="display: none;">
+  
+      <div id="dvSendETH" style="display: none; background-color: aliceblue; border-radius: 10px; margin-top: 20px;">
+        <br>
+        <div style="text-align: left;padding-left: 5px;">
           <br>
           To Account: <input type="text" size="46%"  id="sendAddress" name="sendAddress" required>
+          <br>
+          <br>
+          Current ETH Gas Price:<label id="ethGasPrice"></label> GWEI
+          <br>
+          <br>
+          Your Prefered Gas Price : <input type="text" size="20%" id="txtSendGasPrice" name="txtSendGasPrice" required>GWEI
+          <br>
+          <br>
+          Gas Limit : <input type="text" size="20%" id="txtSendGasLimit" name="txtSendGasLimit" required>
           <br>
           <br>
           Enter ETH Value:   <input type="text" size="10%"  id="enterValue" name="enterValue" required>
           <br>
           <br>
           <button type="button" id="btnTranferToAccount" class="btn-primary">Tranfer ETH </button>
-       </div>
+          <br>
+          <br>
+        </div>
+      </div>
+  
+      <div id="dvSettings" style="display: none; background-color: aliceblue; border-radius: 10px; margin-top: 20px;">
+        <br>
+        <div style="text-align: left;padding-left: 10px;">
+          Network : <input type="text" size="50%" id="txtNetowrk" name="txtNetowrk" required>
+          <button type="button" id="btnChangeNetwork" class="btn-primary">Change Network</button>
+        </div>
+        <br>
+        
+        <div style="text-align: left;padding-left: 10px;">
+          Gas Price : <input type="text" size="20%" id="txtGasPrice" name="txtGasPrice" required>
+          <button type="button" id="btnGasPrice" class="btn-primary">Set Gas Price</button>
+        </div>
+        <br>
+        
+        <div style="text-align: left;padding-left: 10px;">
+          Gas Limit : <input type="text" size="20%" id="txtGasLimit" name="txtGasLimit" required>
+          <button type="button" id="btnGasLimit" class="btn-primary">Set Gas Limit</button>
+        </div>
+        <br>
+      </div>
+  
+  
+    </div>
+
   </body>
 </html>

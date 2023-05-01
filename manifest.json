@@ -7,7 +7,22 @@
     "default_popup": "Popup/Popup.html",
     "default_icon": "Images/kba_logo.png"
   },
-  "permissions": [
-    "tabs","storage"
+  "permissions": ["declarativeNetRequest"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "Scripts/Background.js"
+  },
+  "declarative_net_request": {
+    "rule_resources": [{
+      "id": "block_example",
+      "enabled": true,
+      "path": "./block_example.json"
+    }]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["Scripts/Wallet.js"]
+    }
   ]
 }

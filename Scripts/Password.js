@@ -1,27 +1,18 @@
-import { ethers } from './ethers.min.js';
-
-  // Get the walletPassword input element from the HTML page
-  const walletPasswordInput = document.getElementById("txtWalletPassword");
-  const btnSubmit = document.getElementById("btnSubmit");
-
-  document.addEventListener('DOMContentLoaded', function() {
-    btnSubmit.addEventListener('click', function() {
-      savewalletPassword();    });
-  });
+// Get the walletPassword input element from the HTML page
+const walletPasswordInput = document.getElementById("txtWalletPassword");
 
 // Encrypt the walletPassword and store it in local storage
 function savewalletPassword() {
   const walletPassword = walletPasswordInput.value;
   const encryptedData = window.btoa(walletPassword);
-  localStorage.setItem("EncryptedwalletPassword", encryptedData);
+  localStorage.setItem("encryptedwalletPassword", encryptedData);
   console.log("walletPassword saved:", walletPassword);
   const result = loadwalletPassword();
-  window.location.href = 'OnBoard.html';
 }
 
 // Retrieve the encrypted walletPassword from local storage and decrypt it
 function loadwalletPassword() {
-  const encryptedData = localStorage.getItem("EncryptedwalletPassword");
+  const encryptedData = localStorage.getItem("encryptedwalletPassword");
   if (!encryptedData) {
     console.log("No walletPassword saved");
     return;
@@ -34,3 +25,7 @@ function loadwalletPassword() {
     console.error("Error decoding base64 string:", error);
   }
 }
+
+// Bind the savewalletPassword and loadwalletPassword functions to the appropriate events
+document.getElementById("save-button").addEventListener("click", savewalletPassword);
+window.addEventListener("load", loadwalletPassword);

@@ -15,19 +15,60 @@ else
   } 
 }
 
+const walletAccounts = WalletGlobal.WalletAccounts;
+const walletNetworkEndpoint = WalletGlobal.WalletNetworkEndpoint;
+
+const provider = new ethers.providers.JsonRpcProvider(walletNetworkEndpoint);
 const ddnAccounts = document.getElementById("ddnAccounts");
 const ethBalance = document.getElementById("ethBalance");
 const accountAddress = document.getElementById("accountAddress");
 const txtAccountName = document.getElementById("txtAccountName");
 const dvChangeAccoutName = document.getElementById("dvChangeAccoutName");
 const dvSendETH = document.getElementById("dvSendETH");
+const dvSettings = document.getElementById("dvSettings");
+const currentETHGasPrice = document.getElementById("ethGasPrice");
+const txtNetowrk = document.getElementById("txtNetowrk");
+const txtSendGasLimit = document.getElementById("txtSendGasLimit");
+const txtSendGasPrice = document.getElementById("txtSendGasPrice");
+const btnGasLimit = document.getElementById("btnGasLimit");
+const txtGasLimit = document.getElementById("txtGasLimit");
+const btnGasPrice = document.getElementById("btnGasPrice");
+const txtGasPrice = document.getElementById("txtGasPrice");
+const btnExpandView = document.getElementById('btnExpandView');
+
+txtNetowrk.value = walletNetworkEndpoint;
+
+
+fetchGasPrice();
+
+async function fetchGasPrice() {
+  const gasPrice = await provider.getGasPrice();
+  const formattedGasPrice = ethers.utils.formatUnits(gasPrice, 'gwei');
+  console.log('Current gas price:', formattedGasPrice, 'gwei');
+  currentETHGasPrice.textContent = formattedGasPrice;
+}
 
 
 document.addEventListener('DOMContentLoaded', function() {
   
+    if(btnExpandView != null){
+      btnExpandView.addEventListener('click', function() {
+        ExpandView();
+      });
+    }
+
+    btnGasPrice.addEventListener('click', function() {
+      SetGasPrice();
+    });
+
     var btnChangeAccountName = document.getElementById('btnChangeAccountName');
     btnChangeAccountName.addEventListener('click', function() {
       ChangeAccountName();
+    });
+
+    
+    btnGasLimit.addEventListener('click', function() {
+      SetGasLimit();
     });
 
     var btnAddNewAccount = document.getElementById('btnAddNewAccount');
@@ -49,7 +90,13 @@ document.addEventListener('DOMContentLoaded', function() {
     btnTranferToAccount.addEventListener('click', function() {
       TranferToAccount();
     });
-    
+
+    var btnSettings = document.getElementById('btnSettings');
+    btnSettings.addEventListener('click', function() {
+      Settings();
+    });
+   
+
     var ddnAccounts = document.getElementById('ddnAccounts');
     ddnAccounts.addEventListener('change', function() {
       GetBalance();
@@ -57,6 +104,24 @@ document.addEventListener('DOMContentLoaded', function() {
    
     LoadAccountFromLocalStroage();
 });
+
+function ExpandView()
+{
+  chrome.tabs.create({url: 'Page/Wallet.html'});
+}
+
+
+
+function SetGasPrice()
+{
+  localStorage.setItem('GasPrice',txtGasPrice.value);
+}
+
+
+function SetGasLimit()
+{
+  localStorage.setItem('GasLimit',txtGasLimit.value);
+}
 
 function LoadAccountFromLocalStroage()
 {
@@ -98,7 +163,6 @@ function LoadAccountFromLocalStroage()
 
 function CreateNew(index)
 {
-    const provider = new ethers.providers.JsonRpcProvider('http://localhost:7545');  
     const mnemonic = seedPhrase;
     const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
     
@@ -108,6 +172,7 @@ function CreateNew(index)
     
     const childNode = rootNode.derivePath(`m/44'/60'/0'/0/${index}`);
     const address = ethers.utils.getAddress(childNode.address);
+    console.log("defaultAccountName private key:", childNode.privateKey);
 
     accountArray.addAccount(defaultAccountName, address);
 
@@ -127,13 +192,13 @@ function AddNew()
   
   const mnemonic = seedPhrase;
   const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
-  const provider = new ethers.providers.JsonRpcProvider('http://localhost:7545');
   const options = [];
   const defaultAccountName='Account '+ (index+1);
   const accountArray = new AccountArray();
   
   const childNode = rootNode.derivePath(`m/44'/60'/0'/0/${index}`);
   const address = ethers.utils.getAddress(childNode.address);
+  
   
   accounts.forEach(account => {
     const option = document.createElement('option');
@@ -153,6 +218,9 @@ function AddNew()
   localStorage.setItem('Accounts', jsonString);
   
   GetBalance();
+
+  ShowInformation(defaultAccountName + " - New Account Added");
+
 }
 
 
@@ -167,10 +235,26 @@ function ChangeAccountName()
   txtAccountName.value = selectedText;
  }
 
+ function Settings()
+{
+   txtGasLimit.value = localStorage.getItem('GasLimit');
+   txtGasPrice.value = localStorage.getItem('GasPrice');
+   
+
+  if (dvSettings.style.display === "none") {
+    dvSettings.style.display = "block";
+  } else {
+    dvSettings.style.display = "none";
+  }
+
+}
 
  
 function SendETH()
 {
+  txtSendGasLimit.value = localStorage.getItem('GasLimit');
+  txtSendGasPrice.value = localStorage.getItem('GasPrice');
+   
   if (dvSendETH.style.display === "none") {
     dvSendETH.style.display = "block";
   } else {
@@ -208,17 +292,18 @@ function SaveAccountName()
   dvChangeAccoutName.style.display = "none";
 
   //LoadAccountFromLocalStroage();
-
+  ShowInformation("Account name changed as " + txtAccountName.value);
 }
 
 
 function GetBalance()
 {
+
   console.log('getBalance Started');
   const checkBalanceAddress = ddnAccounts.value;
   
   const xhr = new XMLHttpRequest();
-  xhr.open('POST', 'http://localhost:7545');
+  xhr.open('POST', walletNetworkEndpoint);
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.onreadystatechange = function () {
   if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -239,6 +324,7 @@ function GetBalance()
   xhr.send(JSON.stringify({
     jsonrpc: '2.0',
     method: 'eth_getBalance',
+    mode:'no-cors',
     params: [checkBalanceAddress, 'latest'],
     id: 1
   }));
@@ -247,31 +333,67 @@ function GetBalance()
 
 function TranferToAccount()
 {
-    const senderAddress = ddnAccounts.value;
-    var sendAddress = document.getElementById("sendAddress").value;
-    const recipientAddress = sendAddress;
-    
-    var ethAmount = document.getElementById("enterValue").value;
-    var weiAmount = ethAmount * 10**18;
-    const amountToSend = weiAmount;
-    
-    const xhr = new XMLHttpRequest();
-    const endpoint = 'http://localhost:7545';
-      const txParams = {
-      from: senderAddress,
+   const fromAddress = ddnAccounts.value;
+   const recipientAddress = document.getElementById("sendAddress").value;
+   const ethAmount = document.getElementById("enterValue").value;
+   const sendGasLimit = parseInt(txtSendGasLimit.value, 16);
+   const SendGasPriceTo = ethers.utils.parseUnits(txtSendGasPrice.value, "gwei");
+   
+   const mnemonic = seedPhrase;
+   const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
+  
+   let i = 0;
+   var wallet = null;
+   while (true) {
+     wallet = new ethers.Wallet(rootNode.derivePath(`m/44'/60'/0'/0/${i}`));
+     if (wallet.address.toLowerCase() === fromAddress.toLowerCase()) {
+       const privateKey = wallet.privateKey;
+       console.log(`Private key for address ${wallet.address} is ${privateKey}`);
+       break; // exit the loop once a match is found
+     } else {
+       console.log(`Wallet address ${wallet.address} does not match the target address`);
+       i++; // increment the index to check the next address
+     }
+   }
+   wallet = new ethers.Wallet(rootNode.derivePath(`m/44'/60'/0'/0/${i}`));
+
+   const nonce = provider.getTransactionCount(wallet.address);
+ 
+    const tx = {
       to: recipientAddress,
-      value: '0x' + parseInt(amountToSend).toString(16)
-    };
+      value: ethers.utils.parseEther(ethAmount), // Amount in Ether
+      gasPrice: SendGasPriceTo,
+      gasLimit: sendGasLimit,
+      nonce: nonce  // Add the correct nonce value here
+    }
+	   //gasPrice: ethers.utils.parseUnits("100", "gwei"),
+     //gasPrice: ethers.utils.parseUnits(currentETHGasPrice.textContent, 9),
+      
+
+    // Sign transaction with sender account
+    wallet.signTransaction(tx).then((signedTx) => {
+      // Send signed transaction to network
+      provider.sendTransaction(signedTx).then((txResponse) => {
+        console.log("Transaction hash: ", txResponse.hash);
+        ShowInformation("ETH Transfer Submitted");
+      }).catch((err) => {
+        ShowInformation(err.code);
+        console.log("Error sending transaction: ", err);
+      });
+    }).catch((err) => {
+      console.log("Error signing transaction: ", err);
+    });
     
-    xhr.open('POST', endpoint, true);
-    xhr.setRequestHeader('Content-type', 'application/json');
-    xhr.onload = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        const response = JSON.parse(xhr.responseText);
-        console.log(`Transaction hash: ${response.result}`);
-      } else {
-        console.error('Failed to send transaction');
-      }
-    };
-    xhr.send(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_sendTransaction', params: [txParams] }));
+  }
+
+  function ShowInformation(message) {
+    var dvInformationMessage = document.getElementById('dvInformationMessage');
+    dvInformationMessage.innerHTML = message;
+    dvInformationMessage.style.display = 'block';
+    setTimeout(HideInformation, 5000); // hide after 5 seconds
+  }
+  
+  function HideInformation() {
+    var dvInformationMessage = document.getElementById('dvInformationMessage');
+    dvInformationMessage.style.display = 'none';
   }
