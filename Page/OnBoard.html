@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>KBA Wallet</title>
+	<script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
 	<style>
       body {
       height: 70vh;
@@ -44,7 +45,7 @@
 			text-align: center;
 		}
 	</style>
-	<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' 'unsafe-inline';">
+	
 </head>
 <body>
 	<div class="box">
@@ -52,7 +53,9 @@
     <p>KBA Wallet is a great wallet</p>
     
     <button id="createNewWallet">Create New Wallet</button>
-		<button id="importExistingWallet">Import Existing Wallet</button>
+	<button id="importExistingWallet">Import Existing Wallet</button>
+	<button id="aboutwallet">About</button>
+	<p id="output"></p>
 	</div>
 	<script src="..\Scripts\OnBoard.js"></script>
 </body>
