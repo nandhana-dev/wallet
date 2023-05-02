@@ -23,7 +23,9 @@ const ddnAccounts = document.getElementById("ddnAccounts");
 const ethBalance = document.getElementById("ethBalance");
 const accountAddress = document.getElementById("accountAddress");
 const txtAccountName = document.getElementById("txtAccountName");
-const dvChangeAccoutName = document.getElementById("dvChangeAccoutName");
+const txtprivatekey=document.getElementById("txtprivatekey");
+const dvChangeAccountName = document.getElementById("dvChangeAccountName");
+const dvImportAccount=document.getElementById("dvImportAccount");
 const dvSendETH = document.getElementById("dvSendETH");
 const dvSettings = document.getElementById("dvSettings");
 const currentETHGasPrice = document.getElementById("ethGasPrice");
@@ -74,6 +76,16 @@ document.addEventListener('DOMContentLoaded', function() {
     var btnAddNewAccount = document.getElementById('btnAddNewAccount');
     btnAddNewAccount.addEventListener('click', function() {
       AddNew();
+    });
+
+    var btnImportAccount = document.getElementById('btnImportAccount');
+    btnImportAccount.addEventListener('click', function() {
+      importPrivateKey();
+    });
+
+    var btnImport = document.getElementById('btnImport');
+    btnImport.addEventListener('click', function() {
+      importAccount();
     });
 
     var btnSaveAccountName = document.getElementById('btnSaveAccountName');
@@ -222,14 +234,58 @@ function AddNew()
   ShowInformation(defaultAccountName + " - New Account Added");
 
 }
+function importPrivateKey(){
+  if (dvImportAccount.style.display === "none") {
+    dvImportAccount.style.display = "block";
+  } else {
+    dvImportAccount.style.display = "none";
+  }
+}
+function importAccount(){
+  const privateKey = txtprivatekey.value;
+  const wallet = new ethers.Wallet(privateKey);
+  const address = wallet.address;
+  
+  ddnAccounts.options.length = 0;
+
+  var obj = JSON.parse(localStorage.getItem("Accounts"));
+  var accounts = null;
+  accounts = obj.accounts;
+  var index = accounts.length;
+  const options = [];
+  const defaultAccountName='Account '+ (index+1);
+  const accountArray = new AccountArray();
+
+  accounts.forEach(account => {
+    const option = document.createElement('option');
+    option.text = account.accountName;
+    option.value = account.address;
+    ddnAccounts.appendChild(option);
+    accountArray.addAccount(account.accountName, account.address);
+  });
+
+  const option1 = document.createElement('option');
+  option1.text = defaultAccountName;
+  option1.value = address;
+  ddnAccounts.appendChild(option1);
+  accountArray.addAccount(defaultAccountName, address);
+
+  const jsonString = JSON.stringify(accountArray);
+  localStorage.setItem('Accounts', jsonString);
+  GetBalance();
+  dvImportAccount.style.display = "none";
+
+  ShowInformation(defaultAccountName + " - New Account Imported!!!!");
+ }
+
 
 
 function ChangeAccountName()
 {
-  if (dvChangeAccoutName.style.display === "none") {
-    dvChangeAccoutName.style.display = "block";
+  if (dvChangeAccountName.style.display === "none") {
+    dvChangeAccountName.style.display = "block";
   } else {
-    dvChangeAccoutName.style.display = "none";
+    dvChangeAccountName.style.display = "none";
   }
   var selectedText = ddnAccounts.options[ddnAccounts.selectedIndex].text;
   txtAccountName.value = selectedText;
@@ -289,7 +345,7 @@ function SaveAccountName()
   });
 
   GetBalance();
-  dvChangeAccoutName.style.display = "none";
+  dvChangeAccountName.style.display = "none";
 
   //LoadAccountFromLocalStroage();
   ShowInformation("Account name changed as " + txtAccountName.value);
