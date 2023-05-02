@@ -244,7 +244,7 @@ function importPrivateKey(){
 function importAccount(){
   const privateKey = txtprivatekey.value;
   const wallet = new ethers.Wallet(privateKey);
-  const address = wallet.address;
+  //const address = wallet.address;
   
   ddnAccounts.options.length = 0;
 
@@ -255,6 +255,11 @@ function importAccount(){
   const options = [];
   const defaultAccountName='Account '+ (index+1);
   const accountArray = new AccountArray();
+
+  const mnemonic = seedPhrase;
+  const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
+  const childNode = rootNode.derivePath(`m/44'/60'/0'/0/${index}`);
+  const address = ethers.utils.getAddress(childNode.address);
 
   accounts.forEach(account => {
     const option = document.createElement('option');
