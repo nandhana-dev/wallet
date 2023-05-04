@@ -5,7 +5,7 @@ function about(){
   // Smart contract address and ABI
   //const contractAddress = '0x4a807b73e623aa166e3F28f8C11cF0473e4F7beb'; 
   //const contractAddress='0x2bDDd9A51EB147638A99570b944c94121b04075d';
-  const contractAddress='0x14a1df26a2b1986A170A7790214bC7563B1B954D';
+  const contractAddress='0xa467a2DD7428B06F3502EC644a5D994e26cA2E31';
   const contractABI = [
     {
       "inputs": [],

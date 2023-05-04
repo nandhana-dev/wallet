@@ -1,13 +1,13 @@
 import { ethers } from './ethers.min.js';
 
-  // Get the walletPassword input element from the HTML page
-  const walletPasswordInput = document.getElementById("txtWalletPassword");
-  const btnSubmit = document.getElementById("btnSubmit");
+// Get the walletPassword input element from the HTML page
+const walletPasswordInput = document.getElementById("txtWalletPassword");
+const btnSubmit = document.getElementById("btnSubmit");
 
-  document.addEventListener('DOMContentLoaded', function() {
-    btnSubmit.addEventListener('click', function() {
-      savewalletPassword();    });
-  });
+document.addEventListener('DOMContentLoaded', function() {
+  btnSubmit.addEventListener('click', function() {
+    savewalletPassword();    });
+}); 
 
 // Encrypt the walletPassword and store it in local storage
 function savewalletPassword() {

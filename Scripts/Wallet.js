@@ -26,6 +26,7 @@ const txtAccountName = document.getElementById("txtAccountName");
 const txtprivatekey=document.getElementById("txtprivatekey");
 const dvChangeAccountName = document.getElementById("dvChangeAccountName");
 const dvImportAccount=document.getElementById("dvImportAccount");
+const dvExport=document.getElementById("dvExport");
 const dvSendETH = document.getElementById("dvSendETH");
 const dvSettings = document.getElementById("dvSettings");
 const currentETHGasPrice = document.getElementById("ethGasPrice");
@@ -92,9 +93,14 @@ document.addEventListener('DOMContentLoaded', function() {
     btnSaveAccountName.addEventListener('click', function() {
       SaveAccountName();
     });
+
+    var btnExport=document.getElementById('btnExport');
+    btnExport.addEventListener('click',function(){
+      exportPrivatekey();
+    });
  
     var btnSendETH = document.getElementById('btnSendETH');
-    btnSendETH.addEventListener('click', function() {
+    btnSendETH.addEventListener('click', function(){
       SendETH();
     });
 
@@ -144,7 +150,7 @@ function LoadAccountFromLocalStroage()
   var accounts = null;
 
   if (obj === null) {
-    CreateNew(0);
+    //CreateNew(0);
     obj = JSON.parse(localStorage.getItem("Accounts"));
     accounts = obj.accounts;
   }
@@ -152,9 +158,7 @@ function LoadAccountFromLocalStroage()
   {
     accounts = obj.accounts;
       if (accounts === null || accounts.length === 0) {
-      CreateNew(0);
-      obj = JSON.parse(localStorage.getItem("Accounts"));
-      accounts = obj.accounts;
+        alert("Wallet doesnt have any accounts!!Please create the Wallet")
     }
     else 
     {
@@ -171,26 +175,6 @@ function LoadAccountFromLocalStroage()
 
   GetBalance();
 
-}
-
-function CreateNew(index)
-{
-    const mnemonic = seedPhrase;
-    const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
-    
-    const options = [];
-    const defaultAccountName='Account '+ (index+1);
-    const accountArray = new AccountArray();
-    
-    const childNode = rootNode.derivePath(`m/44'/60'/0'/0/${index}`);
-    const address = ethers.utils.getAddress(childNode.address);
-    console.log("defaultAccountName private key:", childNode.privateKey);
-
-    accountArray.addAccount(defaultAccountName, address);
-
-    const jsonString = JSON.stringify(accountArray);
-    localStorage.setItem('Accounts', jsonString);
-    
 }
 
 function AddNew()
@@ -244,9 +228,6 @@ function importPrivateKey(){
 function importAccount(){
   const privateKey = txtprivatekey.value;
   const wallet = new ethers.Wallet(privateKey);
-  //const address = wallet.address;
-  
-  ddnAccounts.options.length = 0;
 
   var obj = JSON.parse(localStorage.getItem("Accounts"));
   var accounts = null;
@@ -256,19 +237,8 @@ function importAccount(){
   const defaultAccountName='Account '+ (index+1);
   const accountArray = new AccountArray();
 
-  const mnemonic = seedPhrase;
-  const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
-  const childNode = rootNode.derivePath(`m/44'/60'/0'/0/${index}`);
-  const address = ethers.utils.getAddress(childNode.address);
-
-  accounts.forEach(account => {
-    const option = document.createElement('option');
-    option.text = account.accountName;
-    option.value = account.address;
-    ddnAccounts.appendChild(option);
-    accountArray.addAccount(account.accountName, account.address);
-  });
-
+  const address = wallet.address;
+  //add the newly imported account to the list and update the account array
   const option1 = document.createElement('option');
   option1.text = defaultAccountName;
   option1.value = address;
@@ -390,7 +360,32 @@ function GetBalance()
     id: 1
   }));
 }
-
+function exportPrivatekey(){
+  const selectedAccount = ddnAccounts.value;
+  // console.log(`selected account is ${selectedAccount}`)
+  // const wallet=new ethers.Wallet(selectedAccount);
+  // const privateKey = wallet.privateKey;
+  // console.log(`wallet is ${wallet}`);
+  // document.getElementById('output').innerText = 'Your Private Key is ' + privateKey;  
+  // console.log(`Private key for address ${wallet.address} is ${privateKey}`);
+  const mnemonic = seedPhrase;
+  const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
+ 
+  let i = 0;
+  var wallet = null;
+  while (true) {
+    wallet = new ethers.Wallet(rootNode.derivePath(`m/44'/60'/0'/0/${i}`));
+    if (wallet.address.toLowerCase() === selectedAccount.toLowerCase()) {
+      const privateKey = wallet.privateKey;
+      console.log(`Private key for address ${wallet.address} is ${privateKey}`);
+      document.getElementById('output').innerText = 'Your Private Key is ' + privateKey;
+      break; // exit the loop once a match is found
+    } else {
+      console.log(`Wallet address ${wallet.address} does not match the target address`);
+      i++; // increment the index to check the next address
+    }
+  }
+}
 
 function TranferToAccount()
 {
