@@ -194,21 +194,21 @@ function AddNew()
   
   const childNode = rootNode.derivePath(`m/44'/60'/0'/0/${index}`);
   const address = ethers.utils.getAddress(childNode.address);
-  
+  const privateKey = ethers.utils.hexlify(childNode.privateKey);
   
   accounts.forEach(account => {
     const option = document.createElement('option');
     option.text = account.accountName;
     option.value = account.address;
     ddnAccounts.appendChild(option);
-    accountArray.addAccount(account.accountName, account.address);
+    accountArray.addAccount(account.accountName, account.address,account.privateKey);
   });
 
   const option1 = document.createElement('option');
   option1.text = defaultAccountName;
   option1.value = address;
   ddnAccounts.appendChild(option1);
-  accountArray.addAccount(defaultAccountName, address);
+  accountArray.addAccount(defaultAccountName, address,privateKey);
   
   const jsonString = JSON.stringify(accountArray);
   localStorage.setItem('Accounts', jsonString);
@@ -238,12 +238,14 @@ function importAccount(){
   const accountArray = new AccountArray();
 
   const address = wallet.address;
+
+  
   //add the newly imported account to the list and update the account array
   const option1 = document.createElement('option');
   option1.text = defaultAccountName;
   option1.value = address;
   ddnAccounts.appendChild(option1);
-  accountArray.addAccount(defaultAccountName, address);
+  accountArray.addAccount(defaultAccountName, address,privateKey);
 
   const jsonString = JSON.stringify(accountArray);
   localStorage.setItem('Accounts', jsonString);
@@ -363,84 +365,81 @@ function GetBalance()
 function exportPrivatekey(){
   const selectedAccount = ddnAccounts.value;
   // console.log(`selected account is ${selectedAccount}`)
-  // const wallet=new ethers.Wallet(selectedAccount);
-  // const privateKey = wallet.privateKey;
-  // console.log(`wallet is ${wallet}`);
-  // document.getElementById('output').innerText = 'Your Private Key is ' + privateKey;  
-  // console.log(`Private key for address ${wallet.address} is ${privateKey}`);
-  const mnemonic = seedPhrase;
-  const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
- 
-  let i = 0;
-  var wallet = null;
-  while (true) {
-    wallet = new ethers.Wallet(rootNode.derivePath(`m/44'/60'/0'/0/${i}`));
-    if (wallet.address.toLowerCase() === selectedAccount.toLowerCase()) {
-      const privateKey = wallet.privateKey;
-      console.log(`Private key for address ${wallet.address} is ${privateKey}`);
-      document.getElementById('output').innerText = 'Your Private Key is ' + privateKey;
-      break; // exit the loop once a match is found
-    } else {
-      console.log(`Wallet address ${wallet.address} does not match the target address`);
-      i++; // increment the index to check the next address
-    }
+  const obj = JSON.parse(localStorage.getItem("Accounts"));
+  var accounts = null;
+  accounts = obj.accounts;
+  
+
+  //const signerAddress = obj.accounts.find(account => account.address === ddnAccounts.value);
+  //const accountArray = new AccountArray();
+  const account = accounts.find((acc) => acc.address === selectedAccount);
+
+  if (!account) {
+    console.log(`Error: account not found ${account}`);
+    return;
   }
+
+  const privateKey = account.privateKey;
+  document.getElementById('output').innerText = 'Your Private Key is ' + privateKey;
+ 
 }
 
-function TranferToAccount()
-{
-   const fromAddress = ddnAccounts.value;
-   const recipientAddress = document.getElementById("sendAddress").value;
-   const ethAmount = document.getElementById("enterValue").value;
-   const sendGasLimit = parseInt(txtSendGasLimit.value, 16);
-   const SendGasPriceTo = ethers.utils.parseUnits(txtSendGasPrice.value, "gwei");
-   
-   const mnemonic = seedPhrase;
-   const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
   
-   let i = 0;
-   var wallet = null;
-   while (true) {
-     wallet = new ethers.Wallet(rootNode.derivePath(`m/44'/60'/0'/0/${i}`));
-     if (wallet.address.toLowerCase() === fromAddress.toLowerCase()) {
-       const privateKey = wallet.privateKey;
-       console.log(`Private key for address ${wallet.address} is ${privateKey}`);
-       break; // exit the loop once a match is found
-     } else {
-       console.log(`Wallet address ${wallet.address} does not match the target address`);
-       i++; // increment the index to check the next address
-     }
-   }
-   wallet = new ethers.Wallet(rootNode.derivePath(`m/44'/60'/0'/0/${i}`));
+function TranferToAccount() {
+  const fromAddress = ddnAccounts.value;
+  const recipientAddress = document.getElementById("sendAddress").value;
+  const ethAmount = document.getElementById("enterValue").value;
+  const sendGasLimit = parseInt(txtSendGasLimit.value, 16);
+  const SendGasPriceTo = ethers.utils.parseUnits(txtSendGasPrice.value, "gwei");
 
-   const nonce = provider.getTransactionCount(wallet.address);
- 
-    const tx = {
-      to: recipientAddress,
-      value: ethers.utils.parseEther(ethAmount), // Amount in Ether
-      gasPrice: SendGasPriceTo,
-      gasLimit: sendGasLimit,
-      nonce: nonce  // Add the correct nonce value here
-    }
-	   //gasPrice: ethers.utils.parseUnits("100", "gwei"),
-     //gasPrice: ethers.utils.parseUnits(currentETHGasPrice.textContent, 9),
-      
+  const obj = JSON.parse(localStorage.getItem("Accounts"));
+  var accounts = null;
+  accounts = obj.accounts;
+  
 
-    // Sign transaction with sender account
-    wallet.signTransaction(tx).then((signedTx) => {
+  //const signerAddress = obj.accounts.find(account => account.address === ddnAccounts.value);
+  //const accountArray = new AccountArray();
+  const account = accounts.find((acc) => acc.address === fromAddress);
+
+  if (!account) {
+    console.log(`Error: account not found ${account}`);
+    return;
+  }
+
+  const privateKey = account.privateKey;
+  console.log(`Private key for address ${account.address} is ${privateKey}`);
+
+  const wallet = new ethers.Wallet(privateKey);
+  const nonce = provider.getTransactionCount(account.address);
+
+  const tx = {
+    to: recipientAddress,
+    value: ethers.utils.parseEther(ethAmount), // Amount in Ether
+    gasPrice: SendGasPriceTo,
+    gasLimit: sendGasLimit,
+    nonce: nonce, // Add the correct nonce value here
+  };
+
+  // Sign transaction with sender account
+  wallet
+    .signTransaction(tx)
+    .then((signedTx) => {
       // Send signed transaction to network
-      provider.sendTransaction(signedTx).then((txResponse) => {
-        console.log("Transaction hash: ", txResponse.hash);
-        ShowInformation("ETH Transfer Submitted");
-      }).catch((err) => {
-        ShowInformation(err.code);
-        console.log("Error sending transaction: ", err);
-      });
-    }).catch((err) => {
+      provider
+        .sendTransaction(signedTx)
+        .then((txResponse) => {
+          console.log("Transaction hash: ", txResponse.hash);
+          ShowInformation("ETH Transfer Submitted");
+        })
+        .catch((err) => {
+          ShowInformation(err.code);
+          console.log("Error sending transaction: ", err);
+        });
+    })
+    .catch((err) => {
       console.log("Error signing transaction: ", err);
     });
-    
-  }
+}
 
   function ShowInformation(message) {
     var dvInformationMessage = document.getElementById('dvInformationMessage');
