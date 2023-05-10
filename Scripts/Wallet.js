@@ -177,24 +177,32 @@ function LoadAccountFromLocalStroage()
 
 }
 
-function AddNew()
+async function AddNew()
 {
   ddnAccounts.options.length = 0;
+
+  //Decrypt the wallet
+  const decryptPassword = window.atob(password) ;
+  const encryptedJson = localStorage.getItem('EncryptedWallet');
+  const wallet = await ethers.Wallet.fromEncryptedJson(encryptedJson, decryptPassword);
 
   var obj = JSON.parse(localStorage.getItem("Accounts"));
   var accounts = null;
   accounts = obj.accounts;
   var index = accounts.length;
-  
-  const mnemonic = seedPhrase;
+  //const index = wallet.accounts.length;
+  const mnemonic = wallet.mnemonic.phrase;
   const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
   const options = [];
-  const defaultAccountName='Account '+ (index+1);
-  const accountArray = new AccountArray();
+
   
   const childNode = rootNode.derivePath(`m/44'/60'/0'/0/${index}`);
-  const address = ethers.utils.getAddress(childNode.address);
-  const privateKey = ethers.utils.hexlify(childNode.privateKey);
+  const address = childNode.address;
+  const privateKey = childNode.privateKey;
+
+  const defaultAccountName = 'Account ' + (index + 1);
+  const newAccount = new ethers.Wallet(privateKey, wallet.provider);
+  const accountArray = new AccountArray();
   
   accounts.forEach(account => {
     const option = document.createElement('option');
@@ -204,14 +212,16 @@ function AddNew()
     accountArray.addAccount(account.accountName, account.address,account.privateKey);
   });
 
+  const encryptedNewAccount = await newAccount.encrypt(decryptPassword);
   const option1 = document.createElement('option');
   option1.text = defaultAccountName;
   option1.value = address;
   ddnAccounts.appendChild(option1);
-  accountArray.addAccount(defaultAccountName, address,privateKey);
+  accountArray.addAccount(defaultAccountName, address,encryptedNewAccount);
   
   const jsonString = JSON.stringify(accountArray);
   localStorage.setItem('Accounts', jsonString);
+  // Encrypt the private key of the new account using the password and store it in local storage
   
   GetBalance();
 
@@ -225,9 +235,11 @@ function importPrivateKey(){
     dvImportAccount.style.display = "none";
   }
 }
-function importAccount(){
+async function importAccount(){
   const privateKey = txtprivatekey.value;
-  const wallet = new ethers.Wallet(privateKey);
+  const import_Account = new ethers.Wallet(privateKey);
+  const decryptPassword = window.atob(password) ;
+
 
   var obj = JSON.parse(localStorage.getItem("Accounts"));
   var accounts = null;
@@ -237,7 +249,8 @@ function importAccount(){
   const defaultAccountName='Account '+ (index+1);
   const accountArray = new AccountArray();
 
-  const address = wallet.address;
+  const address = import_Account.address;
+  const encrypt_privateKey= await import_Account.encrypt(decryptPassword);
 
   
   //add the newly imported account to the list and update the account array
@@ -245,7 +258,7 @@ function importAccount(){
   option1.text = defaultAccountName;
   option1.value = address;
   ddnAccounts.appendChild(option1);
-  accountArray.addAccount(defaultAccountName, address,privateKey);
+  accountArray.addAccount(defaultAccountName, address,encrypt_privateKey);
 
   const jsonString = JSON.stringify(accountArray);
   localStorage.setItem('Accounts', jsonString);
@@ -362,8 +375,9 @@ function GetBalance()
     id: 1
   }));
 }
-function exportPrivatekey(){
+async function exportPrivatekey(){
   const selectedAccount = ddnAccounts.value;
+  const decryptPassword = window.atob(password) ;
   // console.log(`selected account is ${selectedAccount}`)
   const obj = JSON.parse(localStorage.getItem("Accounts"));
   var accounts = null;
@@ -379,15 +393,27 @@ function exportPrivatekey(){
     return;
   }
 
-  const privateKey = account.privateKey;
-  document.getElementById('output').innerText = 'Your Private Key is ' + privateKey;
+  //const encryptedPrivateKey = account.privateKey;
+  try {
+    //const json = JSON.parse(account.privateKey);
+    const decryptedJson = await ethers.Wallet.fromEncryptedJson(account.privateKey, decryptPassword);
+    const decrypted_privateKey = decryptedJson.privateKey;
+
+    document.getElementById('output').innerText = 'Your Private Key is ' + decrypted_privateKey;
+  } catch (e) {
+    console.log(`Error: ${e.message}`);
+  }
+
+  
+  //document.getElementById('output').innerText = 'Your Private Key is ' + privateKey;
  
 }
 
   
-function TranferToAccount() {
+async function TranferToAccount() {
   const fromAddress = ddnAccounts.value;
   const recipientAddress = document.getElementById("sendAddress").value;
+  const decryptPassword = window.atob(password) ;
   const ethAmount = document.getElementById("enterValue").value;
   const sendGasLimit = parseInt(txtSendGasLimit.value, 16);
   const SendGasPriceTo = ethers.utils.parseUnits(txtSendGasPrice.value, "gwei");
@@ -406,10 +432,12 @@ function TranferToAccount() {
     return;
   }
 
-  const privateKey = account.privateKey;
-  console.log(`Private key for address ${account.address} is ${privateKey}`);
+  //const privateKey = account.privateKey;//****Decrypt privateky has to be implemented****/
+  const decryptedJson = await ethers.Wallet.fromEncryptedJson(account.privateKey, decryptPassword);
+  const decrypted_privateKey = decryptedJson.privateKey;
+  console.log(`Private key for address ${account.address} is ${decrypted_privateKey}`);
 
-  const wallet = new ethers.Wallet(privateKey);
+  const wallet = new ethers.Wallet(decrypted_privateKey);
   const nonce = provider.getTransactionCount(account.address);
 
   const tx = {
