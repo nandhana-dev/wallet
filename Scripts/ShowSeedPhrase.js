@@ -13,8 +13,9 @@ const seedPhrase = document.getElementById("seedPhrase");
 const wallet = ethers.Wallet.createRandom();
 const mnemonic = wallet.mnemonic.phrase;
 const accountArray = new AccountArray();
-const defaultAccountName='Account1'
-accountArray.addAccount(defaultAccountName, wallet.address);
+const defaultAccountName='Account1';
+const privateKey=wallet.privateKey;
+accountArray.addAccount(defaultAccountName, wallet.address,wallet.privateKey);
 const jsonString = JSON.stringify(accountArray);
 localStorage.setItem('Accounts', jsonString);
 
@@ -22,6 +23,14 @@ console.log('New wallet created:');
 console.log(`Address: ${wallet.address}`);
 console.log(`Seed phrase: ${mnemonic}`);
 console.log(`privatekey is ${wallet.privateKey}`);
+
+// Encrypt the wallet and store it in local storage
+const decryptPassword = window.atob(password) ; // Replace with your own password
+wallet.encrypt(decryptPassword).then((encryptedJson) => {
+  localStorage.setItem("EncryptedWallet", encryptedJson);
+  console.log("Wallet is successfully encrypted!!!");
+});
+
 
 localStorage.setItem("SeedPhrase", mnemonic);
 
