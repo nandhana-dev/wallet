@@ -1,7 +1,8 @@
 export class Account {
-    constructor(accountName, address) {
+    constructor(accountName, address,privateKey) {
       this.accountName = accountName;
       this.address = address;
+      this.privateKey=privateKey;
     }
   }
 
@@ -10,8 +11,8 @@ export class Account {
       this.accounts = [];
     }
   
-    addAccount(accountName, address) {
-      const account = new Account(accountName, address);
+    addAccount(accountName, address,privateKey) {
+      const account = new Account(accountName, address,privateKey);
       this.accounts.push(account);
     }
   

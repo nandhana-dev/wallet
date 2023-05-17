@@ -1,4 +1,4 @@
-import { WalletGlobal } from './WalletGlobal.js';
+import {WalletGlobal} from './WalletGlobal.js';
 import { ethers } from './ethers.min.js';
 import { AccountArray } from './Account.js';
 
@@ -222,11 +222,9 @@ async function AddNew()
   const jsonString = JSON.stringify(accountArray);
   localStorage.setItem('Accounts', jsonString);
   // Encrypt the private key of the new account using the password and store it in local storage
-  
-  GetBalance();
-
+    
   ShowInformation(defaultAccountName + " - New Account Added");
-
+  GetBalance();
 }
 function importPrivateKey(){
   if (dvImportAccount.style.display === "none") {
