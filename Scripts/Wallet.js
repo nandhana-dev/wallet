@@ -199,9 +199,10 @@ async function AddNew()
   const childNode = rootNode.derivePath(`m/44'/60'/0'/0/${index}`);
   const address = childNode.address;
   const privateKey = childNode.privateKey;
+  const encryptedPrivateKey = CryptoJS.AES.encrypt(privateKey, decryptPassword).toString();
 
   const defaultAccountName = 'Account ' + (index + 1);
-  const newAccount = new ethers.Wallet(privateKey, wallet.provider);
+  //const newAccount = new ethers.Wallet(privateKey, wallet.provider);
   const accountArray = new AccountArray();
   
   accounts.forEach(account => {
@@ -212,12 +213,12 @@ async function AddNew()
     accountArray.addAccount(account.accountName, account.address,account.privateKey);
   });
 
-  const encryptedNewAccount = await newAccount.encrypt(decryptPassword);
+  //const encryptedNewAccount = await newAccount.encrypt(decryptPassword);
   const option1 = document.createElement('option');
   option1.text = defaultAccountName;
   option1.value = address;
   ddnAccounts.appendChild(option1);
-  accountArray.addAccount(defaultAccountName, address,encryptedNewAccount);
+  accountArray.addAccount(defaultAccountName, address,encryptedPrivateKey);
   
   const jsonString = JSON.stringify(accountArray);
   localStorage.setItem('Accounts', jsonString);
@@ -248,7 +249,7 @@ async function importAccount(){
   const accountArray = new AccountArray();
 
   const address = import_Account.address;
-  const encrypt_privateKey= await import_Account.encrypt(decryptPassword);
+  const encrypt_privateKey= CryptoJS.AES.encrypt(privateKey, decryptPassword).toString();
 
   
   //add the newly imported account to the list and update the account array
@@ -389,15 +390,13 @@ async function exportPrivatekey(){
   if (!account) {
     console.log(`Error: account not found ${account}`);
     return;
-  }
-
-  //const encryptedPrivateKey = account.privateKey;
+  }  
   try {
-    //const json = JSON.parse(account.privateKey);
-    const decryptedJson = await ethers.Wallet.fromEncryptedJson(account.privateKey, decryptPassword);
-    const decrypted_privateKey = decryptedJson.privateKey;
+      // Decrypt the private key
+    const decryptedBytes = CryptoJS.AES.decrypt(account.privateKey, decryptPassword);
+    const decryptedPrivateKey = decryptedBytes.toString(CryptoJS.enc.Utf8);
 
-    document.getElementById('output').innerText = 'Your Private Key is ' + decrypted_privateKey;
+    document.getElementById('output').innerText = 'Your Private Key is ' + decryptedPrivateKey;
   } catch (e) {
     console.log(`Error: ${e.message}`);
   }
@@ -418,11 +417,7 @@ async function TranferToAccount() {
 
   const obj = JSON.parse(localStorage.getItem("Accounts"));
   var accounts = null;
-  accounts = obj.accounts;
-  
-
-  //const signerAddress = obj.accounts.find(account => account.address === ddnAccounts.value);
-  //const accountArray = new AccountArray();
+  accounts = obj.accounts;  
   const account = accounts.find((acc) => acc.address === fromAddress);
 
   if (!account) {
@@ -430,12 +425,12 @@ async function TranferToAccount() {
     return;
   }
 
-  //const privateKey = account.privateKey;//****Decrypt privateky has to be implemented****/
-  const decryptedJson = await ethers.Wallet.fromEncryptedJson(account.privateKey, decryptPassword);
-  const decrypted_privateKey = decryptedJson.privateKey;
-  console.log(`Private key for address ${account.address} is ${decrypted_privateKey}`);
+  // Decrypt the private key
+  const decryptedBytes = CryptoJS.AES.decrypt(account.privateKey, decryptPassword);
+  const decryptedPrivateKey = decryptedBytes.toString(CryptoJS.enc.Utf8);
+  console.log(`Private key for address ${account.address} is ${decryptedPrivateKey}`);
 
-  const wallet = new ethers.Wallet(decrypted_privateKey);
+  const wallet = new ethers.Wallet(decryptedPrivateKey);
   const nonce = provider.getTransactionCount(account.address);
 
   const tx = {
@@ -455,6 +450,7 @@ async function TranferToAccount() {
         .sendTransaction(signedTx)
         .then((txResponse) => {
           console.log("Transaction hash: ", txResponse.hash);
+          alert("Transaction Successful");
           ShowInformation("ETH Transfer Submitted");
         })
         .catch((err) => {

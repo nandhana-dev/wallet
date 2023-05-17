@@ -5,6 +5,7 @@ import { AccountArray } from './Account.js';
 const password = WalletGlobal.WalletPassword;
 const walletAccounts = WalletGlobal.WalletAccounts;
 const walletNetworkEndpoint = WalletGlobal.WalletNetworkEndpoint
+const decryptPassword = window.atob(password) ; 
 const provider = new ethers.providers.JsonRpcProvider(walletNetworkEndpoint);
 
 
@@ -15,7 +16,9 @@ const mnemonic = wallet.mnemonic.phrase;
 const accountArray = new AccountArray();
 const defaultAccountName='Account1';
 const privateKey=wallet.privateKey;
-accountArray.addAccount(defaultAccountName, wallet.address,wallet.privateKey);
+
+const encryptedPrivateKey = CryptoJS.AES.encrypt(privateKey, decryptPassword).toString();
+accountArray.addAccount(defaultAccountName, wallet.address,encryptedPrivateKey);
 const jsonString = JSON.stringify(accountArray);
 localStorage.setItem('Accounts', jsonString);
 
@@ -25,11 +28,12 @@ console.log(`Seed phrase: ${mnemonic}`);
 console.log(`privatekey is ${wallet.privateKey}`);
 
 // Encrypt the wallet and store it in local storage
-const decryptPassword = window.atob(password) ; // Replace with your own password
+
 wallet.encrypt(decryptPassword).then((encryptedJson) => {
   localStorage.setItem("EncryptedWallet", encryptedJson);
-  console.log("Wallet is successfully encrypted!!!");
+    console.log("Wallet is successfully encrypted!!!");
 });
+//accountArray.addAccount(defaultAccountName,wallet.address,encryptedJson);
 
 
 localStorage.setItem("SeedPhrase", mnemonic);

@@ -29,12 +29,11 @@ document.addEventListener('DOMContentLoaded', function() {
 function importwallet(seedPhrase) {
   // Do something with the seed phrase
   alert('Importing wallet with seed phrase: ' + seedPhrase);
-
  
   // Get all the wallet addresses
   provider.listAccounts().then(accounts => {
     console.log('Wallet addresses:', accounts);
   });
-  window.location.href = 'ListAccount.html';
+  window.location.href = 'Wallet.html';
 }
 
