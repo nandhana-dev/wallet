@@ -150,7 +150,7 @@ function LoadAccountFromLocalStroage()
   var accounts = null;
 
   if (obj === null) {
-    //CreateNew(0);
+    ImportWallet(0);
     obj = JSON.parse(localStorage.getItem("Accounts"));
     accounts = obj.accounts;
   }
@@ -175,6 +175,27 @@ function LoadAccountFromLocalStroage()
 
   GetBalance();
 
+}
+function ImportWallet(index)
+{
+    const mnemonic = seedPhrase;
+    const decryptPassword = window.atob(password) ;
+    const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
+    const provider = new ethers.providers.JsonRpcProvider('http://localhost:7545');
+    const options = [];
+    const defaultAccountName='Account '+ (index+1);
+    const accountArray = new AccountArray();
+    
+    const childNode = rootNode.derivePath(`m/44'/60'/0'/0/${index}`);
+    const address = ethers.utils.getAddress(childNode.address);
+    const privateKey = childNode.privateKey;
+    const encryptedPrivateKey = CryptoJS.AES.encrypt(privateKey, decryptPassword).toString();
+
+    accountArray.addAccount(defaultAccountName, address,encryptedPrivateKey);
+
+    const jsonString = JSON.stringify(accountArray);
+    localStorage.setItem('Accounts', jsonString);
+    
 }
 
 async function AddNew()
