@@ -1,7 +1,8 @@
 <html >
   <head>
     <title>KBA Wallet</title>
-    <script type="module" src="..\Scripts\Wallet.js"></script>
+    <script src="../Scripts/crypto-js.js"></script>
+	  <script type="module" src="..\Scripts\Wallet.js"></script>
     <style>
       body {
         height: 97vh;
@@ -64,7 +65,7 @@
   </head>
   <body >
     
-    <div class="box">
+  	<div class="box">
       <button id="btnExpandView">Expand View</button>
       <div id="dvInformationMessage"></div>
       <h1>KBA Wallet</h1>
@@ -79,10 +80,15 @@
   
       <button type="button" id="btnChangeAccountName" >Change Account Name</button>
       <button type="button" id="btnAddNewAccount" >Add New Account</button>
+      <button type="button" id="btnImportAccount">Import Account</button>
+      <br>
+      <br>
       <button type="button" id="btnSendETH" >Send ETH</button>
       <button type="button" id="btnSettings" >Settings</button>
+      <button type="button" id="btnExport">Export</button>
+      <p id = "output"></p>
   
-      <div id="dvChangeAccoutName" style="display: none; background-color: aliceblue; border-radius: 10px; margin-top: 20px;">
+      <div id="dvChangeAccountName" style="display: none; background-color: aliceblue; border-radius: 10px; margin-top: 20px;">
         <br>
         <div style="text-align: center;">
           <br>
@@ -92,9 +98,17 @@
           <button type="button" id="btnSaveAccountName" class="btn-primary">Save Account Name</button>
           <br>
         </div>
-        <br>
       </div>
-  
+      <div id="dvImportAccount" style="display: none; background-color: aliceblue; border-radius: 10px; margin-top: 20px;">
+        <br>
+        <div style="text-align: left;padding-left: 5px;">
+          <br>
+          Enter Private Key:<input type="text" size="20%"  id="txtprivatekey" name="txtprivateKey" required>
+          <br>
+          <button type="button" id="btnImport" class="btn-primary">Import</button>
+          <br>
+        </div>
+      </div>
       <div id="dvSendETH" style="display: none; background-color: aliceblue; border-radius: 10px; margin-top: 20px;">
         <br>
         <div style="text-align: left;padding-left: 5px;">
@@ -120,6 +134,7 @@
         </div>
       </div>
   
+  
       <div id="dvSettings" style="display: none; background-color: aliceblue; border-radius: 10px; margin-top: 20px;">
         <br>
         <div style="text-align: left;padding-left: 10px;">
@@ -143,6 +158,5 @@
   
   
     </div>
-
   </body>
 </html>
