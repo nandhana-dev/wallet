@@ -1,0 +1,21 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  padding: 16px;
+  width: 300px;
+}
+
+button {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+}
