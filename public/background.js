@@ -153,29 +153,68 @@ async function unlockWallet(password) {
   const vault = await storage.get("vault");
   const savedHash = await storage.get("passwordHash");
 
-  if (!vault || !savedHash) throw new Error("Wallet not initialized");
+  if (!vault || !savedHash) {
+    throw new Error("Wallet not initialized");
+  }
 
   const inputHash = await sha256(password);
-  if (inputHash !== savedHash) throw new Error("Invalid password");
+  if (inputHash !== savedHash) {
+    throw new Error("Invalid password");
+  }
 
+  // Decrypt mnemonic
   const phrase = await decrypt(vault, password);
 
-  wallet = ethers
-    .HDNodeWallet
-    .fromMnemonic(ethers.Mnemonic.fromPhrase(phrase), DERIVATION_PATH)
-    .connect(provider);
+  // Recreate wallet
+  const node = ethers.HDNodeWallet.fromMnemonic(
+    ethers.Mnemonic.fromPhrase(phrase),
+    DERIVATION_PATH
+  );
 
+  wallet = node.connect(provider);
   unlocked = true;
+
+  // 🔐 Store decrypted private key in SESSION storage
+  await chrome.storage.session.set({
+    sessionPrivateKey: node.privateKey
+  });
+
+  // Mark unlocked in persistent storage
   await storage.set({ isLocked: false });
 
-  return wallet.address;
+  return wallet.address; // ✅ important for UI
 }
 
-function requireUnlocked() {
-  if (!unlocked || !wallet) {
+
+async function requireUnlocked() {
+  const isLocked = await storage.get("isLocked");
+
+  if (isLocked) {
     throw new Error("Wallet is locked");
   }
+
+  // If wallet already exists in memory → good
+  if (wallet) {
+    return;
+  }
+
+  // 🔁 Worker restarted → try restoring from session storage
+  const session = await chrome.storage.session.get("sessionPrivateKey");
+
+  if (!session.sessionPrivateKey) {
+    throw new Error("Wallet session expired. Please unlock again.");
+  }
+
+  // Reconstruct wallet from stored private key
+  wallet = new ethers.Wallet(
+    session.sessionPrivateKey,
+    provider
+  );
+
+  unlocked = true;
 }
+
+
 
 /* =========================
    BALANCE CHECK (NEW)
@@ -209,13 +248,24 @@ async function handleProviderRequest({ method, params }) {
       return ACTIVE_NETWORK.chainId;
 
     case "eth_getBalance": {
-      const address = params?.[0] || wallet.address;
-      const balance = await provider.getBalance(address);
+      const address = params?.[0];
+
+      // If checking wallet's own balance, ensure restoration
+      if (!address || address === wallet?.address) {
+        await requireUnlocked();
+      }
+
+      const targetAddress = address || wallet.address;
+
+      const balance = await provider.getBalance(targetAddress);
+
       return ethers.toQuantity(balance);
     }
 
+
     case "eth_sendTransaction": {
-      requireUnlocked();
+      await requireUnlocked();
+
 
       const tx = params[0];
 
@@ -225,6 +275,8 @@ async function handleProviderRequest({ method, params }) {
         to: tx.to,
         value: tx.value
       });
+
+      const receipt = await response.wait();
 
       return response.hash;
     }
@@ -271,6 +323,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         case "LOCK_WALLET": {
           wallet = null;
           unlocked = false;
+          await chrome.storage.session.clear();
           await storage.set({ isLocked: true });
           sendResponse({ success: true });
           break;
@@ -294,16 +347,32 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
 
         case "GET_STATE": {
-          const address = wallet?.address || await storage.get("address");
           const isLocked = await storage.get("isLocked");
+          let address = await storage.get("address");
+
+          // 🔁 If worker restarted but wallet was unlocked, restore from session
+          if (!wallet && !isLocked) {
+            const session = await chrome.storage.session.get("sessionPrivateKey");
+
+            if (session.sessionPrivateKey) {
+              wallet = new ethers.Wallet(
+                session.sessionPrivateKey,
+                provider
+              );
+              unlocked = true;
+              address = wallet.address;
+            }
+          }
 
           sendResponse({
-            unlocked: !isLocked && unlocked,
+            unlocked: !isLocked,
             address,
             network: ACTIVE_NETWORK
           });
+
           break;
         }
+
 
         default:
           throw new Error("Unknown message type");
