@@ -6,7 +6,14 @@ export default function Home({ setState }) {
 
       <button
         onClick={() =>
-          setState((s) => ({ ...s, view: "create" }))
+          chrome.runtime.sendMessage({ type: "GET_STATE" }, (res) => {
+            if (res?.address) {
+              // Wallet exists → go unlock instead of create
+              setState((s) => ({ ...s, view: "unlock", initialized: true }));
+            } else {
+              setState((s) => ({ ...s, view: "create" }));
+            }
+          })
         }
       >
         Create Wallet

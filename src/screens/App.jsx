@@ -3,6 +3,7 @@ import Home from "./Home";
 import CreateWallet from "./CreateWallet";
 import Unlock from "./Unlock";
 import Wallet from "./Wallet";
+import Confirm from "./Confirm";
 
 export default function App() {
   const [state, setState] = useState({
@@ -12,6 +13,13 @@ export default function App() {
     view: "home"
   });
 
+  const params = new URLSearchParams(window.location.search);
+  const isConfirm = params.get("confirm");
+
+  if (isConfirm) {
+    return <Confirm />;
+  }
+  
   // NEW: single source of truth re-sync
   const syncWithBackground = () => {
     chrome.runtime.sendMessage({ type: "GET_STATE" }, (res) => {
@@ -42,10 +50,12 @@ export default function App() {
 
   switch (state.view) {
     case "home":
-      return <Home setState={setState} />;
+      // If wallet already exists, skip create → go to unlock
+      return state.initialized ? <Unlock setState={setState} /> : <Home setState={setState} />;
 
     case "create":
-      return <CreateWallet setState={setState} />;
+      // If wallet already exists, skip create → go to unlock
+      return state.initialized ? <Unlock setState={setState} /> : <CreateWallet setState={setState} />;
 
     case "unlock":
       return <Unlock setState={setState} />;

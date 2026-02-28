@@ -99,16 +99,15 @@ export default function Wallet({ state, setState }) {
     );
   };
 
-  const lock = () => {
-    chrome.runtime.sendMessage({ type: "LOCK_WALLET" }, () => {
-      setState({
-        initialized: true,
-        unlocked: false,
-        address: state.address,
-        view: "unlock"
-      });
-    });
-  };
+const lockWallet = async () => {
+  await chrome.runtime.sendMessage({ type: "LOCK_WALLET" });
+  setState((s) => ({
+    ...s,
+    unlocked: false,
+    address: state.address,
+    view: "unlock"    // ✅ Show unlock screen
+  }));
+};
 
   return (
     <div className="container">
@@ -186,7 +185,7 @@ export default function Wallet({ state, setState }) {
         </>
       )}
 
-      <button onClick={lock}>Lock</button>
+      <button onClick={lockWallet}>Lock</button>
     </div>
   );
 }

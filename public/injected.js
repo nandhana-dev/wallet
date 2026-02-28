@@ -6,11 +6,7 @@
 ====================================================== */
 
 (function () {
-  if (window.ethereum) {
-    // Prevent double injection
-    return;
-  }
-
+  
   let requestId = 0;
   const pendingRequests = new Map();
 
@@ -57,11 +53,17 @@
 
       const { response } = message;
 
-      if (response && response.success === false) {
+      if (!response) {
+        pending.reject(new Error("No response from extension"));
+        return;
+      }
+
+      if (response.success === false) {
         pending.reject(new Error(response.error));
       } else {
-        pending.resolve(response);
+        pending.resolve(response.result);
       }
+
     }
 
     // Handle provider events (future use)
@@ -77,28 +79,62 @@
      Minimal Ethereum Provider Object
   ====================================================== */
 
+  const listeners = {};
+  
   const ethereum = {
     isAetherPay: true,
     isMetaMask: false,
-
     request,
-
-    // Optional helpers (MetaMask compatibility)
     enable: () => request({ method: "eth_requestAccounts" }),
-
+    isConnected: () => true,
     on: (event, handler) => {
-      window.addEventListener(event, handler);
-    },
+        if (!listeners[event]) listeners[event] = [];
+        listeners[event].push(handler);
+      },
 
-    removeListener: (event, handler) => {
-      window.removeEventListener(event, handler);
-    }
+      removeListener: (event, handler) => {
+        if (!listeners[event]) return;
+        listeners[event] = listeners[event].filter(h => h !== handler);
+      },
+
+      emit: (event, data) => {
+        if (!listeners[event]) return;
+        listeners[event].forEach(handler => handler(data));
+      }
   };
 
-  Object.defineProperty(window, "ethereum", {
-    value: ethereum,
-    writable: false
-  });
+  if (window.ethereum?.providers) {
+    window.ethereum.providers.push(ethereum);
+  } else if (window.ethereum) {
+    window.ethereum.providers = [window.ethereum, ethereum];
+  } else {
+    Object.defineProperty(window, "ethereum", {
+      value: ethereum,
+      writable: false
+    });
+  }
+
+  function announce() {
+    window.dispatchEvent(
+      new CustomEvent("eip6963:announceProvider", {
+        detail: {
+          info: {
+            uuid: "aetherpay-wallet",
+            name: "AetherPay",
+            icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjNjY2NmZmIi8+PHRleHQgeD0iMTYiIHk9IjIwIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QTwvdGV4dD48L3N2Zz4=",
+            rdns: "com.aetherpay.wallet"
+          },
+          provider: ethereum
+        }
+      })
+    );
+  }
+
+  // 🔹 announce immediately
+  announce();
+
+  // 🔹 also respond to requests
+  window.addEventListener("eip6963:requestProvider", announce);
 
   console.log("🟢 AetherPay injected: window.ethereum is available");
 })();

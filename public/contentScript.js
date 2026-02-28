@@ -17,8 +17,10 @@ function injectProvider() {
   (document.head || document.documentElement).appendChild(script);
 }
 
-injectProvider();
-
+if (!window.__AETHERPAY_INJECTED__) {
+  window.__AETHERPAY_INJECTED__ = true;
+  injectProvider();
+}
 /* ======================================================
    Message Flow: Webpage -> Extension
 ====================================================== */

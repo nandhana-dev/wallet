@@ -26,7 +26,8 @@ export default function Unlock({ setState }) {
           setState({
             initialized: true,
             unlocked: true,
-            address: res.address
+            address: res.address,
+            view: "wallet"
           });
         } else {
           alert(res.error || "Failed to unlock");
