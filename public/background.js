@@ -431,6 +431,29 @@ async function handleProviderRequest({ method, params, origin }, sender) {
       return result;
     }
 
+    case "eth_estimateGas": {
+      await requireUnlocked();
+
+      const tx = params[0];
+      if (!tx) throw new Error("Transaction object required");
+
+      const gasLimit = await provider.estimateGas({
+        from: wallet.address,
+        to: tx.to,
+        value: tx.value || "0x0",
+        data: tx.data || "0x"
+      });
+
+      const feeData = await provider.getFeeData();
+      const maxFeePerGas = feeData.maxFeePerGas ?? 1_000_000_000n;
+      const gasCost = gasLimit * maxFeePerGas;
+
+      return {
+        gasLimit: ethers.toQuantity(gasLimit),
+        gasCost: ethers.formatEther(gasCost) // returns as ETH string
+      };
+    }
+
     default:
       throw new Error(`Unsupported method: ${method}`);
   }
