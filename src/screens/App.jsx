@@ -4,6 +4,7 @@ import CreateWallet from "./CreateWallet";
 import Unlock from "./Unlock";
 import Wallet from "./Wallet";
 import Confirm from "./Confirm";
+import Approve from "./Approve";
 
 export default function App() {
   const [state, setState] = useState({
@@ -15,9 +16,14 @@ export default function App() {
 
   const params = new URLSearchParams(window.location.search);
   const isConfirm = params.get("confirm");
+  const isConnect = params.get("connect");
 
   if (isConfirm) {
     return <Confirm />;
+  }
+
+  if (isConnect) {
+    return <Approve />;
   }
   
   // NEW: single source of truth re-sync

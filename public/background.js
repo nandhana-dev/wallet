@@ -20,6 +20,7 @@ const NETWORKS = {
 const ACTIVE_NETWORK = NETWORKS.hardhat;
 const DERIVATION_PATH = "m/44'/60'/0'/0/0";
 const pendingApprovals = new Map();
+const approvedOrigins = new Map();
 
 /* =========================
    RUNTIME STATE (memory)
@@ -317,32 +318,49 @@ function startPolling(hash) {
    PROVIDER METHODS
 ========================= */
 
-async function handleProviderRequest({ method, params }, sender) {
+async function handleProviderRequest({ method, params, origin }, sender) {
   switch (method) {
 
-    case "eth_requestAccounts":
+    case "eth_requestAccounts": {
       await requireUnlocked();
 
-      // Emit accountsChanged event to the tab
-      if (sender?.tab?.id) {
-        chrome.tabs.sendMessage(sender.tab.id, {
-          type: "PROVIDER_EVENT",
-          event: "accountsChanged",
-          data: [wallet.address]
-        });
+      if (!origin) throw new Error("Origin missing");
 
-        chrome.tabs.sendMessage(sender.tab.id, {
-          type: "PROVIDER_EVENT",
-          event: "chainChanged",
-          data: ACTIVE_NETWORK.chainId
+      const approved = await storage.get("approvedOrigins") || [];
+
+      if (!approved.includes(origin)) {
+
+        const approvalId = crypto.randomUUID();
+
+        return new Promise((resolve, reject) => {
+
+          pendingApprovals.set(approvalId, {
+            type: "connect",
+            origin,
+            resolve,
+            reject,
+            tabId: sender?.tab?.id
+          });
+
+          chrome.windows.create({
+            url: `index.html?connect=true&approvalId=${approvalId}`,
+            type: "popup",
+            width: 420,
+            height: 600
+          });
         });
       }
 
       return [wallet.address];
+    }
 
     case "eth_accounts": {
       try {
         await requireUnlocked();
+
+        const approved = await storage.get("approvedOrigins") || [];
+        if (!approved.includes(origin)) return [];
+
         return [wallet.address];
       } catch {
         return [];
@@ -432,7 +450,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const result = await handleProviderRequest(
           {
             method: message.payload.method,
-            params: message.payload.params
+            params: message.payload.params,
+            origin: message.origin
           },
           sender
         );
@@ -494,6 +513,67 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
           break;
         }
+
+        case "GET_PENDING_CONNECT": {
+          const pending = pendingApprovals.get(message.approvalId);
+          if (!pending) {
+            sendResponse({ success: false });
+            break;
+          }
+
+          sendResponse({
+            success: true,
+            origin: pending.origin
+          });
+          break;
+        }        
+
+        case "APPROVE_CONNECT": {
+          const pending = pendingApprovals.get(message.approvalId);
+          if (!pending || pending.type !== "connect")
+            throw new Error("Approval not found");
+
+          const approved = (await storage.get("approvedOrigins")) || [];
+          approved.push(pending.origin);
+          await storage.set({ approvedOrigins: approved });
+
+          if (pending.tabId) {
+            chrome.tabs.sendMessage(pending.tabId, {
+              type: "PROVIDER_EVENT",
+              event: "connect",
+              data: { chainId: ACTIVE_NETWORK.chainId }
+            });
+
+            chrome.tabs.sendMessage(pending.tabId, {
+              type: "PROVIDER_EVENT",
+              event: "accountsChanged",
+              data: [wallet.address]
+            });
+
+            chrome.tabs.sendMessage(pending.tabId, {
+              type: "PROVIDER_EVENT",
+              event: "chainChanged",
+              data: ACTIVE_NETWORK.chainId
+            });
+          }
+
+          pending.resolve([wallet.address]);
+          pendingApprovals.delete(message.approvalId);
+
+          sendResponse({ success: true });
+          break;
+        }
+
+        case "REJECT_CONNECT": {
+          const pending = pendingApprovals.get(message.approvalId);
+          if (!pending) throw new Error("Approval not found");
+
+          pending.reject(new Error("User rejected connection"));
+          pendingApprovals.delete(message.approvalId);
+
+          sendResponse({ success: true });
+          break;
+        }        
 
         case "GET_PENDING_TX": {
           console.log("GET_PENDING_TX hit");

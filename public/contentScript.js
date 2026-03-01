@@ -41,6 +41,37 @@ window.addEventListener("message", (event) => {
       origin: window.location.origin
     },
     (response) => {
+
+      if (chrome.runtime.lastError) {
+        window.postMessage(
+          {
+            target: "AETHERPAY_INJECTED",
+            requestId: message.requestId,
+            response: {
+              success: false,
+              error: chrome.runtime.lastError.message
+            }
+          },
+          "*"
+        );
+        return;
+      }
+
+      if (!response) {
+        window.postMessage(
+          {
+            target: "AETHERPAY_INJECTED",
+            requestId: message.requestId,
+            response: {
+              success: false,
+              error: "No response from background"
+            }
+          },
+          "*"
+        );
+        return;
+      }
+
       window.postMessage(
         {
           target: "AETHERPAY_INJECTED",
@@ -52,7 +83,6 @@ window.addEventListener("message", (event) => {
     }
   );
 });
-
 /* ======================================================
    Messages from Background -> Webpage (Events)
 ====================================================== */

@@ -10,24 +10,45 @@
   let requestId = 0;
   const pendingRequests = new Map();
 
-  /* ======================================================
-     Core request() implementation (EIP-1193 style)
-  ====================================================== */
+  
 
   function request({ method, params }) {
     return new Promise((resolve, reject) => {
       const id = ++requestId;
 
-      pendingRequests.set(id, { resolve, reject });
+      const timeout = setTimeout(() => {
+        pendingRequests.delete(id);
+        reject(new Error("Request timeout"));
+      }, 30000);
+
+      pendingRequests.set(id, {
+        resolve: (result) => {
+          clearTimeout(timeout);
+
+          // Track selected address
+          if (method === "eth_requestAccounts" || method === "eth_accounts") {
+            if (Array.isArray(result) && result.length > 0) {
+              ethereum.selectedAddress = result[0];
+            }
+          }
+
+          if (method === "eth_chainId") {
+            ethereum.chainId = result;
+          }
+
+          resolve(result);
+        },
+        reject: (err) => {
+          clearTimeout(timeout);
+          reject(err);
+        }
+      });
 
       window.postMessage(
         {
           target: "AETHERPAY_EXTENSION",
           requestId: id,
-          payload: {
-            method,
-            params
-          }
+          payload: { method, params }
         },
         "*"
       );
@@ -66,27 +87,37 @@
 
     }
 
-    // Handle provider events (future use)
     if (message.event) {
-      // Example: accountsChanged, chainChanged
+
+      if (message.event === "accountsChanged") {
+        ethereum.selectedAddress = message.data?.[0] || null;
+      }
+
+      if (message.event === "chainChanged") {
+        ethereum.chainId = message.data;
+      }
+
       if (ethereum && typeof ethereum.emit === "function") {
         ethereum.emit(message.event, message.data);
       }
     }
   });
-
   /* ======================================================
      Minimal Ethereum Provider Object
   ====================================================== */
 
   const listeners = {};
-  
+
   const ethereum = {
     isAetherPay: true,
     isMetaMask: false,
+
+    selectedAddress: null,
+    chainId: null,
+
     request,
     enable: () => request({ method: "eth_requestAccounts" }),
-    isConnected: () => true,
+    isConnected: () => !!ethereum.selectedAddress,
     on: (event, handler) => {
         if (!listeners[event]) listeners[event] = [];
         listeners[event].push(handler);
